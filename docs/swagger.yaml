@@ -1,0 +1,244 @@
+definitions:
+  models.Event:
+    properties:
+      created_at:
+        type: string
+      event_type:
+        type: string
+      id:
+        type: integer
+      payload:
+        additionalProperties: true
+        type: object
+    type: object
+  models.EventData:
+    properties:
+      data:
+        additionalProperties: true
+        description: 事件数据
+        type: object
+      type:
+        description: 事件类型
+        type: string
+    required:
+    - data
+    - type
+    type: object
+  models.EventListResponse:
+    properties:
+      count:
+        type: integer
+      event_type:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/models.Event'
+        type: array
+    type: object
+  models.EventResponse:
+    properties:
+      message:
+        description: 消息
+        type: string
+      status:
+        description: 状态
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /events/:
+    post:
+      consumes:
+      - application/json
+      description: 收集业务事件数据并存储到数据库
+      parameters:
+      - description: 事件数据
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.EventData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+        "400":
+          description: 请求数据格式错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/models.EventResponse'
+      summary: 收集事件数据
+      tags:
+      - 事件管理
+  /events/{event_type}:
+    get:
+      consumes:
+      - application/json
+      description: 根据事件类型获取事件列表
+      parameters:
+      - description: 事件类型
+        in: path
+        name: event_type
+        required: true
+        type: string
+      - default: 100
+        description: 限制数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/models.EventListResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取事件列表
+      tags:
+      - 事件管理
+  /events/{event_type}/count:
+    get:
+      consumes:
+      - application/json
+      description: 获取特定事件类型的计数
+      parameters:
+      - description: 事件类型
+        in: path
+        name: event_type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取事件计数
+      tags:
+      - 事件管理
+  /health/:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务健康状态
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 服务正常
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: 服务异常
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 健康检查
+      tags:
+      - 健康检查
+  /health/ready:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务是否就绪
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 服务就绪
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: 服务未就绪
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 就绪检查
+      tags:
+      - 健康检查
+  /stats/:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统总体统计信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 统计信息
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取总体统计
+      tags:
+      - 统计信息
+  /stats/{event_type}:
+    get:
+      consumes:
+      - application/json
+      description: 获取特定事件类型的详细统计信息
+      parameters:
+      - description: 事件类型
+        in: path
+        name: event_type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 事件类型统计
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取事件类型统计
+      tags:
+      - 统计信息
+swagger: "2.0"
